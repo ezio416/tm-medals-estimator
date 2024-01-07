@@ -6,5 +6,5 @@
 <!-- ![Game Turbo](https://img.shields.io/badge/Game-Turbo-blue) -->
 # Default Medals
 
-Based on a given author time, this will tell you the default gold, silver, and bronze times.
+Based on a given author time, this will tell you the default gold, silver, and bronze times.  
 This can also grab medals from the current map and tell you if they're been changed from the defaults.
