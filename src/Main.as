@@ -41,8 +41,6 @@ void Render() {
 
     CTrackMania@ App = cast<CTrackMania@>(GetApp());
 
-    UI::SetNextWindowSize(212, 180);
-
     UI::Begin(title, S_Show, UI::WindowFlags::AlwaysAutoResize);
         UI::SetNextItemWidth(142.0f);
         authorInput = UI::InputFloat("##input", authorInput);
