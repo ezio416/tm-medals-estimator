@@ -24,7 +24,7 @@ void Main() {
         if (S_Auto) {
             inMap = InMap();
 
-            if (InMap() && !wasInMap)
+            if (inMap && !wasInMap)
                 SetMapMedals();
 
             wasInMap = inMap;
