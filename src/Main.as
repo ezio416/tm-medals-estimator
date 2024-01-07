@@ -39,8 +39,6 @@ void Render() {
     if (!S_Show)
         return;
 
-    CTrackMania@ App = cast<CTrackMania@>(GetApp());
-
     UI::Begin(title, S_Show, UI::WindowFlags::AlwaysAutoResize);
         UI::SetNextItemWidth(142.0f);
         authorInput = UI::InputFloat("##input", authorInput);
@@ -59,7 +57,7 @@ void Render() {
             }
         UI::EndDisabled();
 
-        UI::BeginDisabled(App.RootMap is null);
+        UI::BeginDisabled(GetApp().RootMap is null);
         if (UI::Button("Get medals from current map"))
             SetMapMedals();
         UI::EndDisabled();
