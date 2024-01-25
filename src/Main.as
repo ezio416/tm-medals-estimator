@@ -1,5 +1,5 @@
 // c 2024-01-01
-// m 2024-01-07
+// m 2024-01-25
 
 float  authorInput = 0.0f;
 uint   authorTime  = 0;
@@ -17,19 +17,27 @@ void RenderMenu() {
 }
 
 void Main() {
+    CTrackMania@ App = cast<CTrackMania@>(GetApp());
+
+    bool inEditor;
+    bool wasInEditor = InEditor(App);
     bool inMap;
-    bool wasInMap = InMap();
+    bool wasInMap = InMap(App);
 
     while (true) {
         if (S_Auto) {
-            inMap = InMap();
+            inEditor = InEditor(App);
+            inMap = InMap(App);
 
-            if (inMap && !wasInMap)
+            if ((S_Editor && inEditor && !wasInEditor) || (inMap && !wasInMap))
                 SetMapMedals();
 
+            wasInEditor = inEditor;
             wasInMap = inMap;
-        } else
+        } else {
+            wasInEditor = false;
             wasInMap = false;
+        }
 
         yield();
     }
@@ -103,14 +111,17 @@ void Render() {
 uint[] CalcMedals(uint author) {
     return {
         author,
-        uint(Math::Floor((author * 0.06f + author + 1000.0f) / 1000.0f) * 1000.0f),
-        uint(Math::Floor((author * 0.2f  + author + 1000.0f) / 1000.0f) * 1000.0f),
-        uint(Math::Floor((author * 0.5f  + author + 1000.0f) / 1000.0f) * 1000.0f)
+        uint(Math::Floor((author * 1.06f + 1000.0f) / 1000.0f) * 1000.0f),
+        uint(Math::Floor((author * 1.2f  + 1000.0f) / 1000.0f) * 1000.0f),
+        uint(Math::Floor((author * 1.5f  + 1000.0f) / 1000.0f) * 1000.0f)
     };
 }
 
 uint[] GetMapMedals() {
     CTrackMania@ App = cast<CTrackMania@>(GetApp());
+
+    if (App.RootMap is null || App.RootMap.TMObjective_AuthorTime == uint(-1))
+        return { 0, 0, 0, 0 };
 
     return {
         App.RootMap.TMObjective_AuthorTime,
@@ -120,9 +131,11 @@ uint[] GetMapMedals() {
     };
 }
 
-bool InMap() {
-    CTrackMania@ App = cast<CTrackMania@>(GetApp());
+bool InEditor(CTrackMania@ App) {
+    return App.Editor !is null && App.RootMap !is null;
+}
 
+bool InMap(CTrackMania@ App) {
     return App.Editor is null
         && App.RootMap !is null
         && App.CurrentPlayground !is null
@@ -133,20 +146,72 @@ bool InMap() {
 void SetMapMedals() {
     uint[] medals = GetMapMedals();
 
+    if (medals[0] == 0)
+        return;
+
     authorTime = medals[0];
     mapGold    = medals[1];
     mapSilver  = medals[2];
     mapBronze  = medals[3];
 
-    if (S_Notify) {
+    if (S_NotifyCondition != NotifyCondition::None) {
         uint[] calcMedals = CalcMedals(authorTime);
 
         calcGold   = calcMedals[1];
         calcSilver = calcMedals[2];
         calcBronze = calcMedals[3];
 
-        if (calcGold != mapGold || calcSilver != mapSilver || calcBronze != mapBronze)
-            UI::ShowNotification(title, S_NotifyText, S_NotifyColor);
+        switch (S_NotifyCondition) {
+            case NotifyCondition::AnyChanged:
+                if (calcGold != mapGold || calcSilver != mapSilver || calcBronze != mapBronze)
+                    UI::ShowNotification(title, "One or more medals are custom!", S_NotifyColor);
+                break;
+            case NotifyCondition::AnyEasier:
+                if (calcGold < mapGold || calcSilver < mapSilver || calcBronze < mapBronze)
+                    UI::ShowNotification(title, "One or more medals are easier!", S_NotifyColor);
+                break;
+            case NotifyCondition::AnyHarder:
+                if (calcGold > mapGold || calcSilver > mapSilver || calcBronze > mapBronze)
+                    UI::ShowNotification(title, "One or more medals are harder!", S_NotifyColor);
+                break;
+            case NotifyCondition::GoldChanged:
+                if (calcGold != mapGold)
+                    UI::ShowNotification(title, "The gold medal is custom!", S_NotifyColor);
+                break;
+            case NotifyCondition::GoldEasier:
+                if (calcGold < mapGold)
+                    UI::ShowNotification(title, "The gold medal is easier!", S_NotifyColor);
+                break;
+            case NotifyCondition::GoldHarder:
+                if (calcGold > mapGold)
+                    UI::ShowNotification(title, "The gold medal is harder!", S_NotifyColor);
+                break;
+            case NotifyCondition::SilverChanged:
+                if (calcSilver != mapSilver)
+                    UI::ShowNotification(title, "The silver medal is custom!", S_NotifyColor);
+                break;
+            case NotifyCondition::SilverEasier:
+                if (calcSilver < mapSilver)
+                    UI::ShowNotification(title, "The silver medal is easier!", S_NotifyColor);
+                break;
+            case NotifyCondition::SilverHarder:
+                if (calcSilver > mapSilver)
+                    UI::ShowNotification(title, "The silver medal is harder!", S_NotifyColor);
+                break;
+            case NotifyCondition::BronzeChanged:
+                if (calcBronze != mapBronze)
+                    UI::ShowNotification(title, "The bronze medal is custom!", S_NotifyColor);
+                break;
+            case NotifyCondition::BronzeEasier:
+                if (calcBronze < mapBronze)
+                    UI::ShowNotification(title, "The bronze medal is easier!", S_NotifyColor);
+                break;
+            case NotifyCondition::BronzeHarder:
+                if (calcBronze > mapBronze)
+                    UI::ShowNotification(title, "The bronze medal is harder!", S_NotifyColor);
+                break;
+            default:;
+        }
     }
 
     authorInput = float(authorTime) / 1000.0f;
