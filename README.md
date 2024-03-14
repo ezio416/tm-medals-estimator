@@ -9,3 +9,5 @@ This can also grab medals from the current map and tell you if they're been chan
 
 <!-- ![Game Maniaplanet](https://img.shields.io/badge/Game-Maniaplanet_4-blue) -->
 <!-- ![Game Turbo](https://img.shields.io/badge/Game-Turbo-blue) -->
+
+![image](images/default-medals.png)
